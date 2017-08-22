@@ -1,0 +1,26 @@
+{
+	"name": "leveldb-editor",
+	"description": "Edit a LevelDB from the command line.",
+	"version": "0.1.0",
+	"main": "cli.js",
+	"files": [
+		"index.js",
+		"cli.js"
+	],
+	"keywords": [
+		"leveldb",
+		"editor",
+		"cli",
+		"command line"
+	],
+	"author": "Jannis R <mail@jannisr.de>",
+	"homepage": "https://github.com/derhuerst/leveldb-editor",
+	"repository": "derhuerst/leveldb-editor",
+	"bugs": "https://github.com/derhuerst/leveldb-editor/issues",
+	"license": "ISC",
+	"engines": {
+		"node": ">=6"
+	},
+	"dependencies": {
+	}
+}
