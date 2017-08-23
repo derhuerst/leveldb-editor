@@ -4,6 +4,7 @@
 const mri = require('mri')
 
 const pkg = require('./package.json')
+const ui = require('.')
 
 const argv = mri(process.argv.slice(2), {
 	boolean: ['help', 'h', 'version', 'v']
@@ -12,7 +13,9 @@ const argv = mri(process.argv.slice(2), {
 if (argv.help || argv.h) {
 	process.stdout.write(`
 Usage:
-    leveldb-editor <path-to-leveldb>
+    leveldb-editor [--value-encoding <env>] <path-to-leveldb>
+Options:
+    --value-encoding -e  How the values are encoded in the db. Default: utf8
 Examples:
     leveldb-editor foo/bar/data.leveldb
 \n`)
@@ -25,8 +28,12 @@ if (argv.version || argv.v) {
 }
 
 const showError = (err) => {
-	console.error(err)
+	console.error(err.message || err + '')
 	process.exit(1)
 }
 
-// todo
+const path = argv._[0]
+if (!path) showError('You must provide a path.')
+
+ui(path)
+.once('error', showError)

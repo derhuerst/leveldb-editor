@@ -2,7 +2,7 @@
 	"name": "leveldb-editor",
 	"description": "Edit a LevelDB from the command line.",
 	"version": "0.1.0",
-	"main": "cli.js",
+	"main": "index.js",
 	"files": [
 		"index.js",
 		"cli.js"
@@ -22,5 +22,8 @@
 		"node": ">=6"
 	},
 	"dependencies": {
+		"ansi-escapes": "^2.0.0",
+		"mri": "^1.1.0",
+		"prompt-skeleton": "^0.4.0"
 	}
 }
