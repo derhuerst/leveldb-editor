@@ -26,38 +26,47 @@ const UI = {
 		this.render()
 	},
 	abort: function () {
-		this.done = this.aborted = true
-		this.out.write(esc.clearScreen)
-		this.close()
+		this.quit(true)
 	},
-	submit: function () {
+	quit: function (abort) {
 		this.done = true
-		this.aborted = false
+		this.aborted = !!abort
 		this.out.write(esc.clearScreen)
 		this.close()
 	},
 
-	first: function () {
+	first: function (cb) {
 		this.moveCursor(0)
 		this.render()
+		if ('function' === typeof cb) setImmediate(cb)
 	},
-	last: function () {
+	last: function (cb) {
 		this.moveCursor(this.entries.length - 1)
 		this.render()
+		if ('function' === typeof cb) setImmediate(cb)
 	},
 
-	up: function () {
+	up: function (cb) {
 		if (this.cursor <= 0) return this.bell()
 		this.moveCursor(this.cursor - 1)
 		this.render()
+		if ('function' === typeof cb) setImmediate(cb)
 	},
-	down: function () {
+	down: function (cb) {
 		if (this.cursor >= (this.entries.length - 1)) return this.bell()
 		this.moveCursor(this.cursor + 1)
 		this.render()
+		if ('function' === typeof cb) setImmediate(cb)
 	},
 
-	delete: function (cb = noop) {
+	delete: function () {
+		if (this.queue) {
+			if (this.queue.length === 0) this.queue = null
+			else this.queue.pop()
+			this.render()
+		} else this._delete(noop)
+	},
+	_delete: function (cb = noop) {
 		const e = this.entries[this.cursor]
 		if (!e) return this.bell()
 
@@ -81,10 +90,48 @@ const UI = {
 		})
 	},
 
+	queue: null,
+	queueLock: false,
+	processInput: function (next) {
+		if (this.queueLock || !this.queue) return
+		if (this.queue.length === 0) {
+			setImmediate(next)
+			return
+		}
+		this.queueLock = true
+
+		let cmd = this.queue.shift()
+		cmd = this.commands[cmd] || this.bell
+
+		const self = this
+		cmd.call(this, (err) => {
+			this.queueLock = false
+			if (err) {
+				self.queue = null
+				self.feedback(err, true)
+			} else if (self.queue.length === 0)	{
+				self.queue = null
+				setImmediate(next)
+			} else setImmediate(() => self.processInput(next))
+		})
+	},
 	_: function (c) {
-		if (c === 'd') this.delete()
-		else if (c === 'q') this.submit() // quit
-		// todo
+		if (this.queue) {
+			if (c in this.commands) {
+				this.queue.push(c)
+				this.render()
+			} else this.bell()
+		} else if (c === ':') {
+			this.queue = []
+			this.render()
+		} else if (c in this.commands) this.commands[c].call(this)
+		else this.bell()
+	},
+	submit: function () {
+		if (!this.queue) return this.bell()
+
+		const self = this
+		this.processInput(() => self.render())
 	},
 
 	message: null,
@@ -130,6 +177,8 @@ const UI = {
 			out += this.msgIsError
 				? chalk.bgRed.black(msg)
 				: chalk.bgGreen.black(msg)
+		} else if (this.queue) {
+			out += chalk.bgBlue.black(':' + this.queue.join(''))
 		} else {
 			out += chalk.bgGreen.black(this.dbName)
 		}
@@ -137,6 +186,15 @@ const UI = {
 		this.out.write(this.clear + out)
 		this.clear = styles.clear(out)
 	}
+}
+
+UI.commands = {
+	d: UI._delete,
+	q: UI.quit,
+	j: UI.down,
+	k: UI.up,
+	H: UI.first,
+	L: UI.last
 }
 
 const defaults = {
