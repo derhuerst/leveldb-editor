@@ -5,7 +5,8 @@
 	"main": "index.js",
 	"files": [
 		"index.js",
-		"cli.js"
+		"cli.js",
+		"lib"
 	],
 	"keywords": [
 		"leveldb",
@@ -23,6 +24,7 @@
 	},
 	"dependencies": {
 		"ansi-escapes": "^2.0.0",
+		"level": "^1.7.0",
 		"mri": "^1.1.0",
 		"prompt-skeleton": "^0.4.0"
 	}

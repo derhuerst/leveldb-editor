@@ -2,11 +2,14 @@
 
 const esc = require('ansi-escapes')
 const wrap = require('prompt-skeleton')
+const level = require('level')
+
+const createSlice = require('./lib/slice')
 
 const UI = {
 	moveCursor: function (n) {
 		this.cursor = n
-		this.value = this.values[n].value
+		this.value = this.entries[n].value
 		this.emit()
 	},
 
@@ -33,17 +36,17 @@ const UI = {
 		this.render()
 	},
 	last: function () {
-		this.moveCursor(this.values.length - 1)
+		this.moveCursor(this.entries.length - 1)
 		this.render()
 	},
 
 	up: function () {
-		if (this.cursor === 0) return this.bell()
+		if (this.cursor <= 0) return this.bell()
 		this.moveCursor(this.cursor - 1)
 		this.render()
 	},
 	down: function () {
-		if (this.cursor === (this.values.length - 1)) return this.bell()
+		if (this.cursor >= (this.entries.length - 1)) return this.bell()
 		this.moveCursor(this.cursor + 1)
 		this.render()
 	},
@@ -60,17 +63,30 @@ const UI = {
 	}
 }
 
+const mapEntry = (entry) => entry // todo: strip ANSI
+
 const ui = (path) => {
 	if ('string' !== typeof path) throw new Error('path must be string.')
 
-	// todo: open leveldb
-
 	const ui = Object.create(UI)
-	ui.values = []
 	ui.value = null
-	ui.cursor = 0
 	ui.done = false
 	ui.aborted = false
+
+	const db = ui.db = level(path)
+	const slice = ui.slice = createSlice(db, mapEntry)
+
+	ui.entries = []
+	ui.cursor = 0
+	slice.on('move', (entries) => {
+		ui.entries = entries
+		if (entries.length > 0) {
+			ui.moveCursor(Math.min(ui.cursor, entries.length - 1))
+		}
+		ui.render()
+	})
+	// todo: slice.on('error', …)
+	setImmediate(slice.move, 'down', 100)
 
 	return wrap(ui)
 }
