@@ -24,8 +24,12 @@
 	},
 	"dependencies": {
 		"ansi-escapes": "^2.0.0",
+		"chalk": "^2.1.0",
+		"cli-styles": "^0.6.2",
 		"level": "^1.7.0",
 		"mri": "^1.1.0",
-		"prompt-skeleton": "^0.4.0"
+		"prompt-skeleton": "^0.4.0",
+		"split-lines": "^1.1.0",
+		"window-size": "^1.1.0"
 	}
 }

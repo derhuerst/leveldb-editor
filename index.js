@@ -1,6 +1,12 @@
 'use strict'
 
 const esc = require('ansi-escapes')
+const termSize = require('window-size').get
+const chalk = require('chalk')
+const styles = require('cli-styles')
+const splitLines = require('split-lines')
+const stripAnsi = require('strip-ansi')
+const path = require('path')
 const wrap = require('prompt-skeleton')
 const level = require('level')
 
@@ -54,26 +60,58 @@ const UI = {
 	_: function (c) { // todo
 	},
 
-
-
+	clear: '',
 	render: function (first) {
 		if (first) this.out.write(esc.cursorHide)
 
-		// todo
+		const {width, height} = termSize()
+
+		let out = ''
+		if (this.entries.length > 0) {
+			const entries = this.entries.slice(0, height - 1)
+			for (let i = 0; i < entries.length; i++) {
+				const e = entries[i]
+
+				out += [
+					i === this.cursor ? chalk.blue(e.key) : e.key,
+					chalk.gray(e.value)
+				].join(' ') + '\n'
+			}
+		} else out += chalk.red('no entries') + '\n'
+
+		if (this.error) {
+			const msg = this.error.message || splitLines(this.error + '')[0]
+			out += chalk.bgRed.black(msg) + '\n'
+		} else {
+			out += chalk.bgGreen.black(this.dbName) + '\n'
+		}
+
+		this.out.write(this.clear + out)
+		this.clear = styles.clear(out)
 	}
 }
 
-const mapEntry = (entry) => entry // todo: strip ANSI
+const defaults = {
+	value: null,
+	error: null,
+	done: false,
+	aborted: false
+}
 
-const ui = (path) => {
-	if ('string' !== typeof path) throw new Error('path must be string.')
+// todo: strip ANSI
+const mapEntry = (entry) => ({
+	rawKey: entry.key,
+	key: stripAnsi(entry.key),
+	value: stripAnsi(entry.value)
+})
 
-	const ui = Object.create(UI)
-	ui.value = null
-	ui.done = false
-	ui.aborted = false
+const ui = (dbPath) => {
+	if ('string' !== typeof dbPath) throw new Error('db path must be string.')
 
-	const db = ui.db = level(path)
+	const ui = Object.assign(Object.create(UI), defaults)
+	ui.dbName = path.basename(dbPath)
+
+	const db = ui.db = level(dbPath)
 	const slice = ui.slice = createSlice(db, mapEntry)
 
 	ui.entries = []
@@ -85,8 +123,19 @@ const ui = (path) => {
 		}
 		ui.render()
 	})
-	// todo: slice.on('error', …)
 	setImmediate(slice.move, 'down', 100)
+
+	let errorTimeout = null
+	slice.on('error', (err) => {
+		ui.error = err
+		if (errorTimeout !== null) clearTimeout(errorTimeout)
+		errorTimeout = setTimeout(clearError)
+		ui.render()
+	})
+	const clearError = () => {
+		ui.error = null
+		ui.render()
+	}
 
 	return wrap(ui)
 }
