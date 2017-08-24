@@ -166,8 +166,7 @@ const UI = {
 
 				out += [
 					i === this.cursor ? chalk.blue(e.key) : e.key,
-					chalk.gray(e.value),
-					i
+					chalk.gray(e.value)
 				].join(' ') + '\n'
 			}
 		} else out += chalk.red('no entries') + '\n'

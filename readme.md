@@ -2,6 +2,8 @@
 
 **Edit a [LevelDB](https://leveldb.org/) from the command line.**
 
+[![asciicast](https://asciinema.org/a/134893.png)](https://asciinema.org/a/134893)
+
 [![npm version](https://img.shields.io/npm/v/leveldb-editor.svg)](https://www.npmjs.com/package/leveldb-editor)
 [![build status](https://img.shields.io/travis/derhuerst/leveldb-editor.svg)](https://travis-ci.org/derhuerst/leveldb-editor)
 ![ISC-licensed](https://img.shields.io/github/license/derhuerst/leveldb-editor.svg)
@@ -14,11 +16,18 @@
 npm install -g leveldb-editor
 ```
 
+You may want to run `leveldb-editor` using [npx](https://www.npmjs.com/package/npx).
+
 
 ## Usage
 
 ```shell
-todo
+Usage:
+    leveldb-editor [--value-encoding <env>] <path-to-leveldb>
+Options:
+    --value-encoding -e  How the values are encoded in the db. Default: utf8
+Examples:
+    leveldb-editor foo/bar/data.leveldb
 ```
 
 
