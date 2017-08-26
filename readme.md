@@ -5,7 +5,6 @@
 [![asciicast](https://asciinema.org/a/134893.png)](https://asciinema.org/a/134893)
 
 [![npm version](https://img.shields.io/npm/v/leveldb-editor.svg)](https://www.npmjs.com/package/leveldb-editor)
-[![build status](https://img.shields.io/travis/derhuerst/leveldb-editor.svg)](https://travis-ci.org/derhuerst/leveldb-editor)
 ![ISC-licensed](https://img.shields.io/github/license/derhuerst/leveldb-editor.svg)
 [![chat on gitter](https://badges.gitter.im/derhuerst.svg)](https://gitter.im/derhuerst)
 

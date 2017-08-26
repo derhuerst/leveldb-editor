@@ -1,8 +1,11 @@
 {
 	"name": "leveldb-editor",
 	"description": "Edit a LevelDB from the command line.",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"main": "index.js",
+	"bin": {
+		"leveldb-editor": "./cli.js"
+	},
 	"files": [
 		"index.js",
 		"cli.js",
