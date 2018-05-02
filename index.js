@@ -209,7 +209,6 @@ const mapEntry = (entry) => ({
 	value: stripAnsi(entry.value)
 })
 
-const noop = () => {}
 const ui = (dbPath) => {
 	if ('string' !== typeof dbPath) throw new Error('db path must be string.')
 
