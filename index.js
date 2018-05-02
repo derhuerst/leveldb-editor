@@ -209,13 +209,16 @@ const mapEntry = (entry) => ({
 	value: stripAnsi(entry.value)
 })
 
+const noop = () => {}
 const ui = (dbPath) => {
 	if ('string' !== typeof dbPath) throw new Error('db path must be string.')
 
 	const ui = Object.assign(Object.create(UI), defaults)
 	ui.dbName = path.basename(dbPath)
 
-	const db = ui.db = level(dbPath)
+	const db = ui.db = level(dbPath, (err) => {
+		if (err) out.emit('error', err)
+	})
 	const slice = ui.slice = createSlice(db, mapEntry)
 
 	ui.entries = []
@@ -231,7 +234,8 @@ const ui = (dbPath) => {
 	})
 	setImmediate(slice.move, 'down', 100)
 
-	return wrap(ui)
+	const out = wrap(ui)
+	return out
 }
 
 module.exports = ui
