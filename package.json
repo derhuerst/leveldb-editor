@@ -28,12 +28,12 @@
 	"dependencies": {
 		"ansi-escapes": "^3.1.0",
 		"chalk": "^2.1.0",
-		"cli-styles": "^0.6.2",
+		"cli-styles": "^1.0.0",
 		"level": "^3.0.0",
 		"mri": "^1.1.0",
 		"prompt-skeleton": "^0.4.0",
 		"split-lines": "^1.1.0",
-		"strip-ansi": "^4.0.0",
+		"strip-ansi": "^7.0.0",
 		"window-size": "^1.1.0"
 	}
 }
