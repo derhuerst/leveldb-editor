@@ -28,10 +28,10 @@
 	"dependencies": {
 		"ansi-escapes": "^4.3.2",
 		"chalk": "^4.1.2",
-		"cli-styles": "^0.6.2",
+		"cli-styles": "^1.0.0",
 		"level": "^7.0.1",
 		"mri": "^1.1.0",
-		"prompt-skeleton": "^0.4.0",
+		"prompt-skeleton": "^1.0.3",
 		"split-lines": "^2.1.0",
 		"strip-ansi": "^6.0.1",
 		"window-size": "^1.1.0"

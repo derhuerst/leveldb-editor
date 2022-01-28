@@ -36,4 +36,4 @@ const path = argv._[0]
 if (!path) showError('You must provide a path.')
 
 ui(path)
-.once('error', showError)
+.catch(showError)

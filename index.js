@@ -18,7 +18,6 @@ const UI = {
 	moveCursor: function (n) {
 		this.cursor = n
 		this.value = this.entries[n].value
-		this.emit()
 	},
 
 	reset: function () {
@@ -26,37 +25,38 @@ const UI = {
 		this.render()
 	},
 	abort: function () {
-		this.quit(true)
+		this.aborted = true
+		this.quit({}, true)
 	},
-	quit: function (abort) {
+	quit: function (_, cb = noop) {
 		this.done = true
-		this.aborted = !!abort
-		this.out.write(esc.clearScreen)
+		this.out.write('')
 		this.close()
+		cb()
 	},
 
-	first: function (cb) {
+	first: function (_, cb = noop) {
 		this.moveCursor(0)
 		this.render()
-		if ('function' === typeof cb) setImmediate(cb)
+		cb()
 	},
-	last: function (cb) {
+	last: function (_, cb = noop) {
 		this.moveCursor(this.entries.length - 1)
 		this.render()
-		if ('function' === typeof cb) setImmediate(cb)
+		cb()
 	},
 
-	up: function (cb) {
+	up: function (_, cb = noop) {
 		if (this.cursor <= 0) return this.bell()
 		this.moveCursor(this.cursor - 1)
 		this.render()
-		if ('function' === typeof cb) setImmediate(cb)
+		cb()
 	},
-	down: function (cb) {
+	down: function (_, cb = noop) {
 		if (this.cursor >= (this.entries.length - 1)) return this.bell()
 		this.moveCursor(this.cursor + 1)
 		this.render()
-		if ('function' === typeof cb) setImmediate(cb)
+		cb()
 	},
 
 	delete: function () {
@@ -64,15 +64,15 @@ const UI = {
 			if (this.queue.length === 0) this.queue = null
 			else this.queue.pop()
 			this.render()
-		} else this._delete(noop)
+		} else this._delete()
 	},
-	_delete: function (cb = noop) {
+	_delete: function (_, cb = noop) {
 		const e = this.entries[this.cursor]
 		if (!e) return this.bell()
 
-		e.pending = true
 		this.render()
 
+		// todo: pending indicator
 		const self = this
 		this.db.del(e.rawKey, (err) => {
 			if (err) {
@@ -92,27 +92,25 @@ const UI = {
 
 	queue: null,
 	queueLock: false,
-	processInput: function (next) {
+	processInput: function () {
 		if (this.queueLock || !this.queue) return
-		if (this.queue.length === 0) {
-			setImmediate(next)
-			return
-		}
+		if (this.queue.length === 0) return;
 		this.queueLock = true
 
 		let cmd = this.queue.shift()
 		cmd = this.commands[cmd] || this.bell
 
 		const self = this
-		cmd.call(this, (err) => {
+		cmd.call(this, {}, (err) => {
 			this.queueLock = false
 			if (err) {
 				self.queue = null
 				self.feedback(err, true)
-			} else if (self.queue.length === 0)	{
-				self.queue = null
-				setImmediate(next)
-			} else setImmediate(() => self.processInput(next))
+				return;
+			}
+			if (self.queue.length === 0) self.queue = null
+			else setImmediate(() => self.processInput())
+			self.render()
 		})
 	},
 	_: function (c) {
@@ -131,7 +129,7 @@ const UI = {
 		if (!this.queue) return this.bell()
 
 		const self = this
-		this.processInput(() => self.render())
+		this.processInput()
 	},
 
 	message: null,
@@ -152,11 +150,8 @@ const UI = {
 		this.render()
 	},
 
-	clear: '',
-	render: function (first) {
-		if (first) this.out.write(esc.cursorHide)
-
-		const {width, height} = termSize()
+	render: function () {
+		const {height} = termSize()
 
 		let out = ''
 		if (this.entries.length > 0) {
@@ -182,9 +177,13 @@ const UI = {
 			out += chalk.bgGreen.black(this.dbName)
 		}
 
-		this.out.write(this.clear + out)
-		this.clear = styles.clear(out)
-	}
+		this.out.write(out)
+	},
+
+	onError: (err) => {
+		this.value = err
+		this.abort()
+	},
 }
 
 UI.commands = {
@@ -216,7 +215,7 @@ const ui = (dbPath) => {
 	ui.dbName = path.basename(dbPath)
 
 	const db = ui.db = level(dbPath, (err) => {
-		if (err) out.emit('error', err)
+		if (err) ui.onError(err)
 	})
 	const slice = ui.slice = createSlice(db, mapEntry)
 
