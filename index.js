@@ -8,7 +8,6 @@ const splitLines = require('split-lines')
 const stripAnsi = require('strip-ansi')
 const path = require('path')
 const wrap = require('prompt-skeleton')
-const level = require('level')
 
 const createSlice = require('./lib/slice')
 
@@ -208,15 +207,14 @@ const mapEntry = (entry) => ({
 	value: stripAnsi(entry.value)
 })
 
-const ui = (dbPath) => {
-	if ('string' !== typeof dbPath) throw new Error('db path must be string.')
+const ui = (db, dbPath) => {
+	if ('object' !== typeof db || db === null) throw new TypeError('db must be an object.')
+	if ('string' !== typeof dbPath) throw new TypeError('dbPath must be string.')
 
 	const ui = Object.assign(Object.create(UI), defaults)
+	ui.db = db
 	ui.dbName = path.basename(dbPath)
 
-	const db = ui.db = level(dbPath, (err) => {
-		if (err) ui.onError(err)
-	})
 	const slice = ui.slice = createSlice(db, mapEntry)
 
 	ui.entries = []

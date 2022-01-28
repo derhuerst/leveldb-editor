@@ -27,6 +27,8 @@ if (argv.version || argv.v) {
 	process.exit(0)
 }
 
+const level = require('level')
+
 const showError = (err) => {
 	console.error(err.message || err + '')
 	process.exit(1)
@@ -35,5 +37,10 @@ const showError = (err) => {
 const path = argv._[0]
 if (!path) showError('You must provide a path.')
 
-ui(path)
-.catch(showError)
+// todo: indicate pending open
+level(path, (err, db) => {
+	if (err) showError(err)
+
+	ui(db, path)
+	.catch(showError)
+})
