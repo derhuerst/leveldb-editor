@@ -200,11 +200,10 @@ const defaults = {
 	aborted: false
 }
 
-// todo: strip ANSI
-const mapEntry = (entry) => ({
-	rawKey: entry.key,
-	key: stripAnsi(entry.key),
-	value: stripAnsi(entry.value)
+const mapEntry = ([key, value]) => ({
+	rawKey: key,
+	key: stripAnsi(key),
+	value: stripAnsi(value)
 })
 
 const ui = (db, dbPath) => {
@@ -220,15 +219,17 @@ const ui = (db, dbPath) => {
 	ui.entries = []
 	ui.cursor = 0
 
-	slice.on('error', (err) => ui.onError(err))
-	slice.on('move', (entries) => {
+	slice.on('change', (entries) => {
 		ui.entries = entries
 		if (entries.length > 0) {
 			ui.moveCursor(Math.min(ui.cursor, entries.length - 1))
 		}
 		ui.render()
 	})
-	setImmediate(slice.move, 'down', 100)
+	setImmediate(() => {
+		slice.move('down', 100)
+		.catch(err => ui.onError(err))
+	})
 
 	const out = wrap(ui)
 	return out
