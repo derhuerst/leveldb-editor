@@ -30,7 +30,7 @@ if (argv.version || argv.v) {
 const level = require('level')
 
 const showError = (err) => {
-	console.error(err.message || err + '')
+	console.error(err)
 	process.exit(1)
 }
 

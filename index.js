@@ -117,12 +117,13 @@ const UI = {
 			if (c in this.commands) {
 				this.queue.push(c)
 				this.render()
-			} else this.bell()
+			} else this.bell()
 		} else if (c === ':') {
 			this.queue = []
 			this.render()
-		} else if (c in this.commands) this.commands[c].call(this)
-		else this.bell()
+		} else if (this.commands[c]) {
+			this.commands[c].call(this)
+		} else this.bell()
 	},
 	submit: function () {
 		if (!this.queue) return this.bell()
@@ -154,7 +155,7 @@ const UI = {
 
 		let out = ''
 		if (this.entries.length > 0) {
-			const entries = this.entries.slice(0, height - 1)
+			const entries = this.entries.slice(0, height - 2)
 			for (let i = 0; i < entries.length; i++) {
 				const e = entries[i]
 
