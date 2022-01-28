@@ -23,17 +23,17 @@
 	"bugs": "https://github.com/derhuerst/leveldb-editor/issues",
 	"license": "ISC",
 	"engines": {
-		"node": ">=6"
+		"node": ">=16"
 	},
 	"dependencies": {
-		"ansi-escapes": "^3.1.0",
-		"chalk": "^2.1.0",
+		"ansi-escapes": "^4.3.2",
+		"chalk": "^4.1.2",
 		"cli-styles": "^0.6.2",
-		"level": "^5.0.0",
+		"level": "^7.0.1",
 		"mri": "^1.1.0",
 		"prompt-skeleton": "^0.4.0",
-		"split-lines": "^1.1.0",
-		"strip-ansi": "^4.0.0",
+		"split-lines": "^2.1.0",
+		"strip-ansi": "^6.0.1",
 		"window-size": "^1.1.0"
 	}
 }
